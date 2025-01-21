@@ -7,6 +7,8 @@ descripcion?: string;
 
 fechaLanzamiento?: Date ;
 
+portada?: string;
+
 }
 
 export class Pelicula implements IPelicula{
@@ -14,6 +16,7 @@ export class Pelicula implements IPelicula{
         public id?: number,
         public nombre?: string,
         public descripcion?: string,
-        public fechaLanzamiento?: Date 
+        public fechaLanzamiento?: Date,
+        public portada?: string,
     ){}
 }

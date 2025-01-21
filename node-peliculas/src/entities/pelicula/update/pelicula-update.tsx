@@ -1,80 +1,108 @@
-import { useState } from "react"
-import { Pelicula } from "../pelicula.model"
-import { crearPelicula } from "../../pelicula.service"
+import { useState } from "react";
+import { Pelicula } from "../pelicula.model";
+import { crearPelicula } from "../../pelicula.service";
 
 export function PeliculaUpdate() {
+  const [formData, setFormData] = useState<Pelicula>({
+    nombre: "",
+    descripcion: "",
+    fechaLanzamiento: undefined, // Asegúrate de que sea opcional en la interfaz
+    portada: "",
+  });
 
-    const[formData, setFormData] = useState<Pelicula>({
-        nombre: "",
-        descripcion: "", 
-    })
+  const [file, setFile] = useState<File | null>(null);
 
-    const handleChange = (e :React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target
-       if (name === "fechaLanzamiento") {
-      setFormData({ ...formData, [name]: new Date(value) });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name === "fechaLanzamiento") {
+      setFormData((prev) => ({ ...prev, [name]: new Date(value) }));
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+
+    if (selectedFile) {
+      setFile(selectedFile);
+      setFormData((prev) => ({ ...prev, portada: selectedFile.name }));
     }
+  };
 
-    const handleSubmit = async (e : React.FormEvent) => {
-        e.preventDefault
-            const nuevaPelicula = await crearPelicula(formData);
-            setFormData({nombre: "", descripcion: "", fechaLanzamiento: undefined})
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
 
+
+    try {
+      await crearPelicula(formData, file);
+      alert("Película creada exitosamente.");
+      setFormData({
+        nombre: "",
+        descripcion: "",
+        fechaLanzamiento: undefined,
+        portada: "",
+      });
+      setFile(null);
+    } catch (error) {
+      console.error("Error al crear la película:", error);
+      alert("Ocurrió un error al crear la película.");
     }
+  };
 
-
-    return(<>
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
         <div>
-        <form onSubmit={handleSubmit}>
-            <div>
-        <label> 
-            Nombre:  
+          <label>
+            Nombre:
             <input
-            type="text"
-            name="nombre"
-            value={formData?.nombre || ""}
-            onChange={handleChange}
-            required
+              type="text"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleChange}
+              required
             />
-           
-        </label>
+          </label>
         </div>
         <div>
-        <label> 
-            Descripción: 
+          <label>
+            Descripción:
             <input
-            type="text"
-             name="descripcion"
-            value={formData?.descripcion || ""}
-            onChange={handleChange}
-            required
+              type="text"
+              name="descripcion"
+              value={formData.descripcion}
+              onChange={handleChange}
+              required
             />
-        </label>
+          </label>
         </div>
-
         <div>
-        <label> 
-            Fecha Lanzamiento: 
+          <label>
+            Fecha Lanzamiento:
             <input
-            type="date"
-             name="fechaLanzamiento"
-            value={formData?.fechaLanzamiento?.toISOString().split('T')[0] || "" }
-            onChange={handleChange}
-            required
+              type="date"
+              name="fechaLanzamiento"
+              value={
+                formData.fechaLanzamiento
+                  ? formData.fechaLanzamiento.toISOString().split("T")[0]
+                  : ""
+              }
+              onChange={handleChange}
+              
             />
-        </label>
+          </label>
         </div>
-        <button type="submit"> Crear Pelicula</button>
-
-        </form>
-
+        <div>
+          <label>
+            Subir Imagen:
+            <input type="file" name="imagen" onChange={handleFile} accept="image/*" />
+          </label>
         </div>
-    
-    
-    </>)
-   
+        <button type="submit">Crear Película</button>
+      </form>
+    </div>
+  );
 }

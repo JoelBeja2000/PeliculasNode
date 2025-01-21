@@ -54,12 +54,16 @@ export const buscarByIdPeliculas = async(id: string) : Promise<IPelicula> => {
 
 }
 
-export const crearPelicula = async(pelicula: IPelicula): Promise<IPelicula> => {
+export const crearPelicula = async(pelicula: IPelicula, file: File | null): Promise<IPelicula> => {
+
+    const data = new FormData()
+    data.append("pelicula", JSON.stringify(pelicula))
+
+    if(file){ data.append("file", file )}
 
     const response = await fetch(apiUrl,{
     method: 'POST',
-    headers: {"Content-Type" : "application/JSON"},
-    body: JSON.stringify(pelicula)
+    body: data
     })
 
     if(!response.ok){
